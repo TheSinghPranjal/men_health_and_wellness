@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../../../app/route_names.dart';
+import '../../../../app/theme/app_theme.dart';
 import '../../../../app/theme/clay_tokens.dart';
 import '../../../../core/errors/app_exception.dart';
 import '../../../../core/storage/storage_providers.dart';
@@ -12,6 +13,9 @@ import '../../../../core/utils/dates.dart';
 import '../../../../core/widgets/clay_buttons.dart';
 import '../../../../core/widgets/clay_components.dart';
 import '../../../../core/widgets/clay_surface.dart';
+import '../../../education/presentation/widgets/article_widgets.dart';
+import '../../../education/presentation/widgets/topic_layout.dart';
+import '../../../home/presentation/home_art.dart';
 import '../../domain/habit.dart';
 import '../controllers/habit_controllers.dart';
 import '../widgets/habit_widgets.dart';
@@ -165,23 +169,21 @@ class _HabitEditScreenState extends ConsumerState<HabitEditScreen> {
   @override
   Widget build(BuildContext context) {
     final editing = _existing != null;
-    return ClayPage(
+    final clay = context.clay;
+    final labelStyle = context.text.titleMedium!.weight(800);
+    return HeroHeaderPage(
       title: editing ? 'Edit habit' : 'New habit',
+      subtitle: 'Build small habits for a healthier, stronger you.',
+      art: const GoalArt(),
       children: [
         if (!editing) ...[
-          Text('Start from an idea', style: context.text.titleMedium),
+          Text('Start from an idea', style: labelStyle),
           const SizedBox(height: Gap.md),
-          Wrap(
-            spacing: Gap.sm,
-            runSpacing: Gap.sm,
+          ClayGrid(
+            minTileHeight: 0,
             children: [
               for (final t in HabitTemplate.all)
-                ClayChoiceChip(
-                  label: t.title,
-                  icon: t.icon,
-                  selected: _title.text == t.title,
-                  onTap: () => _applyTemplate(t),
-                ),
+                _TemplateTile(template: t, selected: _title.text == t.title, onTap: () => _applyTemplate(t)),
             ],
           ),
           const SizedBox(height: Gap.xl),
@@ -191,13 +193,20 @@ class _HabitEditScreenState extends ConsumerState<HabitEditScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
+              Text('Title', style: labelStyle),
+              const SizedBox(height: Gap.sm),
               TextFormField(
                 controller: _title,
                 maxLength: Habit.maxTitle,
                 validator: HabitValidator.title,
                 textCapitalization: TextCapitalization.sentences,
-                decoration: const InputDecoration(labelText: 'Title'),
+                decoration: InputDecoration(
+                  hintText: 'e.g. Brisk walk',
+                  prefixIcon: Icon(Icons.edit_outlined, color: clay.textSecondary),
+                ),
               ),
+              const SizedBox(height: Gap.md),
+              Text('Description (optional)', style: labelStyle),
               const SizedBox(height: Gap.sm),
               TextFormField(
                 controller: _description,
@@ -205,13 +214,18 @@ class _HabitEditScreenState extends ConsumerState<HabitEditScreen> {
                 validator: HabitValidator.description,
                 maxLines: 2,
                 minLines: 1,
-                decoration: const InputDecoration(labelText: 'Description (optional)'),
+                decoration: InputDecoration(
+                  hintText: 'Add more details about your habit…',
+                  prefixIcon: Icon(Icons.description_outlined, color: clay.textSecondary),
+                ),
               ),
             ],
           ),
         ),
         const SizedBox(height: Gap.lg),
-        Text('Which days?', style: context.text.titleMedium),
+        Text('Which days?', style: labelStyle),
+        const SizedBox(height: Gap.xs),
+        Text('Select the days you want to follow this habit.', style: context.text.bodySmall),
         const SizedBox(height: Gap.md),
         WeekdayPicker(
           selected: _weekdays,
@@ -229,6 +243,7 @@ class _HabitEditScreenState extends ConsumerState<HabitEditScreen> {
           title: 'Reminder',
           subtitle: _reminder == null ? 'Off' : 'At ${_reminder!.format(context)} · discreet wording',
           icon: Icons.notifications_none_rounded,
+          tone: ClayTone.lavender,
           onTap: _pickReminder,
           trailing: _reminder == null
               ? null
@@ -242,6 +257,7 @@ class _HabitEditScreenState extends ConsumerState<HabitEditScreen> {
           title: 'Start date',
           subtitle: DateFormat.yMMMd().format(_startDate),
           icon: Icons.event_rounded,
+          tone: ClayTone.blue,
           onTap: _pickStart,
         ),
         ClaySurface(
@@ -254,12 +270,7 @@ class _HabitEditScreenState extends ConsumerState<HabitEditScreen> {
           ),
         ),
         const SizedBox(height: Gap.xl),
-        ClayButton(
-          label: editing ? 'Save changes' : 'Create habit',
-          icon: Icons.check_rounded,
-          loading: _saving,
-          onPressed: _save,
-        ),
+        _PrimaryActionButton(label: editing ? 'Save changes' : 'Create habit', loading: _saving, onPressed: _save),
         if (editing) ...[
           const SizedBox(height: Gap.md),
           ClayButton(
@@ -270,6 +281,88 @@ class _HabitEditScreenState extends ConsumerState<HabitEditScreen> {
           ),
         ],
       ],
+    );
+  }
+}
+
+/// Tinted tile for a habit idea; selected when the form holds its title.
+class _TemplateTile extends StatelessWidget {
+  const _TemplateTile({required this.template, required this.selected, required this.onTap});
+  final HabitTemplate template;
+  final bool selected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final clay = context.clay;
+    final pair = clay.tone(template.tone);
+    return ClaySurface(
+      color: Color.lerp(pair.fill, clay.surface, selected ? 0.15 : 0.55),
+      selected: selected,
+      depth: selected ? 0.9 : 0.6,
+      radius: 20,
+      padding: const EdgeInsets.symmetric(horizontal: Gap.md, vertical: Gap.md),
+      onTap: onTap,
+      semanticLabel: '${template.title}. ${template.benefit}${selected ? ', selected' : ''}',
+      child: Row(
+        children: [
+          TopicBadge(icon: template.icon, tone: template.tone, size: 38, round: true),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(template.title, style: context.text.titleSmall!.weight(800)),
+                Text(template.benefit, style: context.text.bodySmall),
+              ],
+            ),
+          ),
+          if (selected) Icon(Icons.check_circle_rounded, color: clay.accent, size: 22),
+        ],
+      ),
+    );
+  }
+}
+
+/// Full-width deep teal call to action with a trailing arrow.
+class _PrimaryActionButton extends StatelessWidget {
+  const _PrimaryActionButton({required this.label, required this.loading, required this.onPressed});
+  final String label;
+  final bool loading;
+  final VoidCallback onPressed;
+
+  static const _teal = Color(0xFF1E6E66);
+
+  @override
+  Widget build(BuildContext context) {
+    return ConstrainedBox(
+      constraints: const BoxConstraints(minHeight: 58),
+      child: ClaySurface(
+        color: _teal,
+        radius: 24,
+        depth: 1,
+        padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 17),
+        onTap: loading ? null : onPressed,
+        semanticLabel: label,
+        child: Row(
+          children: [
+            const SizedBox(width: 24),
+            Expanded(
+              child: Text(
+                label,
+                textAlign: TextAlign.center,
+                style: context.text.titleMedium!.copyWith(color: Colors.white).weight(800),
+              ),
+            ),
+            SizedBox.square(
+              dimension: 24,
+              child: loading
+                  ? const CircularProgressIndicator(strokeWidth: 2.4, color: Colors.white)
+                  : const Icon(Icons.arrow_forward_rounded, color: Colors.white),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

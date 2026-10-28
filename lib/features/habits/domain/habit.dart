@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../app/theme/clay_tokens.dart';
+
 import '../../../core/utils/dates.dart';
 
 @immutable
@@ -107,23 +109,68 @@ abstract final class HabitValidator {
 /// treatments.
 @immutable
 class HabitTemplate {
-  const HabitTemplate(this.title, this.description, this.icon, {this.weekdays = Habit.allDays});
+  const HabitTemplate(
+    this.title,
+    this.description,
+    this.icon, {
+    required this.benefit,
+    required this.tone,
+    this.weekdays = Habit.allDays,
+  });
   final String title;
   final String description;
   final IconData icon;
+
+  /// Two or three words on why it helps, shown on the template tile.
+  final String benefit;
+  final ClayTone tone;
   final Set<int> weekdays;
 
   static const all = [
-    HabitTemplate('Brisk walk', '10–30 minutes at a pace that warms you up', Icons.directions_walk_rounded),
-    HabitTemplate('Breathing practice', 'Three minutes of slow breathing', Icons.air_rounded),
-    HabitTemplate('Wind-down routine', 'Screens off and a calm half hour before bed', Icons.bedtime_rounded),
+    HabitTemplate(
+      'Brisk walk',
+      '10–30 minutes at a pace that warms you up',
+      Icons.directions_walk_rounded,
+      benefit: 'Be more active',
+      tone: ClayTone.teal,
+    ),
+    HabitTemplate(
+      'Breathing practice',
+      'Three minutes of slow breathing',
+      Icons.air_rounded,
+      benefit: 'Reduce stress',
+      tone: ClayTone.blue,
+    ),
+    HabitTemplate(
+      'Wind-down routine',
+      'Screens off and a calm half hour before bed',
+      Icons.bedtime_rounded,
+      benefit: 'Better sleep',
+      tone: ClayTone.lavender,
+    ),
     HabitTemplate(
       'Strength session',
       'Simple body-weight or gym exercises',
       Icons.fitness_center_rounded,
+      benefit: 'Build stamina',
+      tone: ClayTone.peach,
       weekdays: {1, 4},
     ),
-    HabitTemplate('Read one article', 'Learn something from the library', Icons.menu_book_rounded, weekdays: {2, 5}),
-    HabitTemplate('Alcohol-free day', 'A day off from drinking', Icons.local_drink_rounded, weekdays: {1, 2, 3}),
+    HabitTemplate(
+      'Read one article',
+      'Learn something from the library',
+      Icons.menu_book_rounded,
+      benefit: 'Learn something new',
+      tone: ClayTone.slate,
+      weekdays: {2, 5},
+    ),
+    HabitTemplate(
+      'Alcohol-free day',
+      'A day off from drinking',
+      Icons.local_drink_rounded,
+      benefit: 'Feel better',
+      tone: ClayTone.rose,
+      weekdays: {1, 2, 3},
+    ),
   ];
 }

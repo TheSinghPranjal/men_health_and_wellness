@@ -89,29 +89,87 @@ class CategoryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final tone = context.clay.tone(category.tone);
+    final clay = context.clay;
+    final tone = clay.tone(category.tone);
+    final countLabel = count == 1 ? '1 article' : '$count articles';
     return ClaySurface(
       color: tone.fill,
+      padding: EdgeInsets.zero,
       onTap: () => context.push(Routes.category(category.name)),
-      semanticLabel: '${category.label}, ${count == 1 ? '1 article' : '$count articles'}',
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Icon(category.icon, color: tone.onFill, size: 28),
-          const Spacer(),
-          const SizedBox(height: Gap.md),
-          Text(
-            category.label,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-            style: context.text.titleMedium!.copyWith(color: tone.onFill).weight(800),
+      semanticLabel: '${category.label}, $countLabel. ${category.description}',
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(ClayTheme.radiusMd),
+          // Lighter top-left wash gives the soft pastel glow.
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [Color.lerp(tone.fill, clay.surface, 0.55)!, tone.fill],
           ),
-          Text(
-            count == 1 ? '1 article' : '$count articles',
-            style: context.text.labelMedium!.copyWith(color: tone.onFill),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(14),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  TopicBadge(icon: category.icon, tone: category.tone),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          category.label,
+                          maxLines: 3,
+                          overflow: TextOverflow.ellipsis,
+                          style: context.text.titleSmall!.copyWith(color: tone.onFill).weight(800),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          countLabel,
+                          style: context.text.labelMedium!.copyWith(color: tone.onFill.withValues(alpha: 0.8)),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Icon(Icons.chevron_right_rounded, size: 20, color: tone.onFill.withValues(alpha: 0.75)),
+                ],
+              ),
+              const SizedBox(height: Gap.md),
+              Text(
+                category.description,
+                style: context.text.bodySmall!.copyWith(color: tone.onFill.withValues(alpha: 0.85), height: 1.35),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
+    );
+  }
+}
+
+/// Rounded square icon chip, a shade deeper than its tone's fill.
+class TopicBadge extends StatelessWidget {
+  const TopicBadge({super.key, required this.icon, required this.tone, this.size = 40, this.round = false});
+  final IconData icon;
+  final ClayTone tone;
+  final double size;
+  final bool round;
+
+  @override
+  Widget build(BuildContext context) {
+    final pair = context.clay.tone(tone);
+    return Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        color: Color.lerp(pair.fill, pair.onFill, 0.14),
+        borderRadius: BorderRadius.circular(round ? size / 2 : size * 0.34),
+      ),
+      child: Icon(icon, color: pair.onFill, size: size * 0.55),
     );
   }
 }

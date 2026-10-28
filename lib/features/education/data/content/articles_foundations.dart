@@ -1,3 +1,6 @@
+import 'package:flutter/material.dart';
+
+import '../../../../app/theme/clay_tokens.dart';
 import '../../domain/article.dart';
 import 'sources.dart';
 
@@ -14,10 +17,32 @@ const foundationArticles = <Article>[
     sections: [
       ArticleSection(
         heading: 'Two systems that usually work together',
-        paragraphs: [
-          'Desire is the mental interest in sex: thoughts, fantasies, or wanting closeness. Arousal is the physical response: faster breathing, increased blood flow to the genitals, and an erection.',
-          'They often happen together, but not always. It is common to feel interested without a strong physical response, or to notice a physical response without much interest. Neither situation means something is wrong.',
+        comparison: [
+          ConceptCard(
+            title: 'Desire',
+            subtitle: 'Mental interest',
+            body:
+                'Desire is the mental interest in sex: thoughts, fantasies, emotional connection or wanting closeness.',
+            icon: Icons.psychology_rounded,
+            tone: ClayTone.rose,
+            examples: ['Sexual thoughts or fantasies', 'Wanting intimacy or closeness', 'Feeling interested in sex'],
+          ),
+          ConceptCard(
+            title: 'Arousal',
+            subtitle: 'Physical response',
+            body:
+                'Arousal is the physical response: faster breathing, increased blood flow to the genitals, and an erection.',
+            icon: Icons.monitor_heart_rounded,
+            tone: ClayTone.blue,
+            examples: [
+              'Faster heart rate and breathing',
+              'Blood flow to the genitals',
+              'Erection or genital sensitivity',
+            ],
+          ),
         ],
+        note:
+            'They often happen together, but not always. It is common to feel interested without a strong physical response, or to notice a physical response without much interest. Neither situation means something is wrong.',
       ),
       ArticleSection(
         heading: 'Why the difference matters',

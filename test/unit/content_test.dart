@@ -84,7 +84,7 @@ void main() {
         final text = [
           a.title,
           a.summary,
-          for (final s in a.sections) ...[...s.paragraphs, ...s.bullets],
+          for (final s in a.sections) ...s.text,
         ].join(' ');
         for (final m in pattern.allMatches(text)) {
           final window = text.substring((m.start - 40).clamp(0, text.length), m.start).toLowerCase();

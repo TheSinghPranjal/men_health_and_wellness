@@ -59,7 +59,7 @@ void main() {
     testWidgets('bottom tabs navigate', (tester) async {
       await pumpApp(tester, TestEnv(prefs: onboarded));
       for (final (tab, title) in const [
-        ('Learn', 'Topics'),
+        ('Learn', 'Browse Topics'),
         ('My Health', 'Private reflections'),
         ('Progress', 'Tracking is off'),
         ('Profile', 'Appearance'),

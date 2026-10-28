@@ -453,6 +453,7 @@ class ClayListTile extends StatelessWidget {
     this.tone = ClayTone.slate,
     this.trailing,
     this.onTap,
+    this.tinted = false,
   });
 
   final String title;
@@ -462,11 +463,15 @@ class ClayListTile extends StatelessWidget {
   final Widget? trailing;
   final VoidCallback? onTap;
 
+  /// Washes the tile in a light version of [tone].
+  final bool tinted;
+
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.only(bottom: Gap.md),
       child: ClaySurface(
+        color: tinted ? Color.lerp(context.clay.tone(tone).fill, context.clay.surface, 0.5) : null,
         onTap: onTap,
         semanticLabel: onTap == null ? null : title,
         padding: const EdgeInsets.symmetric(horizontal: Gap.lg, vertical: 14),

@@ -14,6 +14,7 @@ import '../../data/article_repository.dart';
 import '../../domain/article.dart';
 import '../controllers/library_controller.dart';
 import '../widgets/article_widgets.dart';
+import '../widgets/topic_layout.dart';
 
 class ArticleScreen extends ConsumerStatefulWidget {
   const ArticleScreen({super.key, required this.articleId});
@@ -61,11 +62,14 @@ class _ArticleScreenState extends ConsumerState<ArticleScreen> {
       );
     }
     final bookmarked = ref.watch(libraryProvider.select((s) => s.isBookmarked(article.id)));
-    final tone = context.clay.tone(article.category.tone);
     final related = repo.related(article);
 
-    return ClayPage(
+    final reviewed = article.reviewStatus == ReviewStatus.clinicallyReviewed;
+
+    return HeroHeaderPage(
       title: article.title,
+      eyebrow: ClayTag(article.category.label, tone: article.category.tone, icon: article.category.icon),
+      art: TopicHeroArt(icon: article.category.icon, tone: article.category.tone),
       actions: [
         ClayIconButton(
           icon: bookmarked ? Icons.bookmark_rounded : Icons.bookmark_border_rounded,
@@ -74,28 +78,25 @@ class _ArticleScreenState extends ConsumerState<ArticleScreen> {
           onPressed: _toggleBookmark,
         ),
       ],
+      meta: Wrap(
+        spacing: Gap.sm,
+        runSpacing: Gap.sm,
+        children: [
+          ClayTag('${article.readMinutes} min read', icon: Icons.schedule_rounded),
+          ClayTag(
+            article.reviewStatus.label,
+            tone: reviewed ? ClayTone.sage : ClayTone.sand,
+            icon: Icons.verified_outlined,
+          ),
+        ],
+      ),
       children: [
-        Wrap(
-          spacing: Gap.sm,
-          runSpacing: Gap.sm,
-          children: [
-            ClayTag(article.category.label, tone: article.category.tone, icon: article.category.icon),
-            ClayTag('${article.readMinutes} min read', icon: Icons.schedule_rounded),
-            ClayTag(
-              article.reviewStatus.label,
-              tone: article.reviewStatus == ReviewStatus.clinicallyReviewed ? ClayTone.sage : ClayTone.sand,
-              icon: Icons.verified_outlined,
-            ),
-          ],
+        TintedCallout(
+          icon: Icons.lightbulb_outline_rounded,
+          tone: ClayTone.teal,
+          title: 'Key takeaway',
+          body: article.summary,
         ),
-        const SizedBox(height: Gap.lg),
-        ClaySurface(
-          color: tone.fill,
-          depth: 1.2,
-          padding: const EdgeInsets.all(Gap.xl),
-          child: Text(article.summary, style: context.text.titleMedium!.copyWith(color: tone.onFill, height: 1.45)),
-        ),
-        const SizedBox(height: Gap.lg),
         for (final w in article.safetyWarnings)
           SafetyPanel(
             title: 'Safety information',
@@ -159,18 +160,28 @@ class _SectionBlock extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: Gap.xl),
+      padding: const EdgeInsets.only(bottom: Gap.md),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Semantics(header: true, child: Text(section.heading, style: context.text.titleLarge)),
-          const SizedBox(height: Gap.md),
+          SectionTitle(section.heading),
           for (final p in section.paragraphs)
             Padding(
               padding: const EdgeInsets.only(bottom: Gap.md),
               child: Text(p, style: context.text.bodyLarge),
             ),
-          if (section.bullets.isNotEmpty) BulletList(section.bullets),
+          if (section.comparison.isNotEmpty) ...[
+            ClayGrid(minTileHeight: 0, children: [for (final c in section.comparison) ConceptCardView(card: c)]),
+            const SizedBox(height: Gap.lg),
+          ],
+          if (section.note != null)
+            TintedCallout(
+              icon: Icons.info_rounded,
+              tone: ClayTone.blue,
+              title: 'Important to know',
+              body: section.note!,
+            ),
+          for (final b in section.bullets) CheckRow(b),
         ],
       ),
     );
@@ -191,12 +202,13 @@ class _InfoCard extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(bottom: Gap.lg),
       child: ClaySurface(
+        color: Color.lerp(context.clay.tone(tone).fill, context.clay.surface, 0.55),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
               children: [
-                ClayIconBadge(icon: icon, tone: tone, size: 40),
+                TopicBadge(icon: icon, tone: tone, size: 40, round: true),
                 const SizedBox(width: Gap.md),
                 Expanded(child: Text(title, style: context.text.titleMedium!.weight(800))),
               ],

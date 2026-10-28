@@ -118,9 +118,9 @@ class WeekdayPicker extends StatelessWidget {
         for (var d = 1; d <= 7; d++) ...[
           Expanded(
             child: ClaySurface(
-              radius: 14,
-              padding: const EdgeInsets.symmetric(vertical: 12),
-              color: selected.contains(d) ? clay.accent : clay.surfaceSunken,
+              radius: 18,
+              padding: const EdgeInsets.symmetric(vertical: 14),
+              color: selected.contains(d) ? const Color(0xFF1E6E66) : clay.surfaceSunken,
               depth: selected.contains(d) ? 0.8 : 0.2,
               onTap: () => onToggle(d),
               semanticLabel: '${_long[d - 1]}${selected.contains(d) ? ', selected' : ''}',
@@ -128,7 +128,7 @@ class WeekdayPicker extends StatelessWidget {
                 child: Text(
                   _short[d - 1],
                   style: context.text.titleSmall!.copyWith(
-                    color: selected.contains(d) ? clay.onAccent : clay.textPrimary,
+                    color: selected.contains(d) ? Colors.white : clay.textPrimary,
                   ),
                 ),
               ),
